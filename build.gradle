@@ -1,0 +1,68 @@
+plugins {
+    id 'java-library'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+group = 'edu.uci.ics.peiot'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    // configuration that holds jars to include in the jar
+    extraLibs
+}
+
+
+
+dependencies {
+    implementation 'net.sourceforge.argparse4j:argparse4j:0.8.1'
+    implementation 'org.slf4j:slf4j-api:1.7.12'
+    implementation 'org.slf4j:slf4j-simple:1.7.12'
+    implementation "org.zeromq:jeromq:0.5.1"
+    implementation 'com.google.guava:guava:25.1-jre'
+    implementation "com.opencsv:opencsv:5.4"
+
+    //legacy
+    implementation "javax.xml.bind:jaxb-api:2.3.0"
+
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.9.8"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    configurations.compile.extendsFrom(configurations.extraLibs)
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "edu.uci.ics.peiot.dataconnector.wifi.Main",
+                "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
+    }
+
+    from {
+        configurations.runtimeClasspath.filter{ it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task builduci(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'PE-IoT UCI WiFi Data Connector',
+                'Implementation-Version': archiveVersion,
+                'Main-Class': 'edu.uci.ics.peiot.dataconnector.wifi.Main',
+                "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
+    }
+    baseName = project.name + '-wifidataconnector-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+test {
+    useJUnitPlatform()
+}

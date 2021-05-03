@@ -1,0 +1,3 @@
+prod_in_pipe_path: /path/to/pipe
+
+exp_data_directory: /path/to/historical/data/directory
